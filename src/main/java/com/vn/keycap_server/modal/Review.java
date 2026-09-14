@@ -52,6 +52,10 @@ public class Review extends AbstractEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // Trạng thái ẩn/hiện của đánh giá (admin/staff quản lý)
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean isHidden = false;
+
     // Phản hồi của admin/staff
     @OneToOne(mappedBy = "review", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private ReviewReply reply;

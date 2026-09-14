@@ -19,6 +19,7 @@ public interface ReviewMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "imageUrls", source = "imageUrls")
     @Mapping(target = "reply", source = "reply")
+    @Mapping(target = "isHidden", source = "isHidden")
     ReviewResponse reviewToReviewResponse(Review review);
 
     @Mapping(target = "fullName", source = "fullName")

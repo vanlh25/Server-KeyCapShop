@@ -95,6 +95,7 @@ public class OrderMapper {
         return OrderItemResponse.builder()
                 .id(item.getId())
                 .productId(product.getId())
+                .variantId(variant.getId())
                 .productName(product.getName())
                 .productImage(imageUrl)
                 .quantity(item.getQuantity())

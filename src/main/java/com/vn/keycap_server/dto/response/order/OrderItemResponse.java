@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemResponse {
     private Long id;
     private Long productId;
+    private Long variantId;
     private String productName;
     private String productImage;
     private Integer quantity;

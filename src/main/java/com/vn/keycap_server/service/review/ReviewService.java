@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vn.keycap_server.dto.response.review.ReviewResponse;
 import com.vn.keycap_server.dto.response.review.AvailableReviewResponse;
+import com.vn.keycap_server.dto.response.review.AdminReviewSummaryResponse;
 import com.vn.keycap_server.mapper.ReviewMapper;
 import com.vn.keycap_server.modal.Review;
 import com.vn.keycap_server.modal.ReviewReply;
@@ -30,6 +31,7 @@ import com.vn.keycap_server.modal.User;
 import com.vn.keycap_server.repository.ReviewReplyRepository;
 import com.vn.keycap_server.repository.UserRepository;
 import com.vn.keycap_server.repository.ReviewRepository;
+import com.vn.keycap_server.repository.projection.ProductReviewSummaryProjection;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +57,7 @@ public class ReviewService implements IReviewService {
         // Đánh giá mới nhất hiển thị trước
         Pageable pageable = PageRequest.of(pageIndex, size, Sort.by("createdAt").descending());
 
-        Page<Review> reviewPage = reviewRepository.findByProduct_Id(productId, pageable);
+        Page<Review> reviewPage = reviewRepository.findByProduct_IdAndIsHiddenFalse(productId, pageable);
 
         List<ReviewResponse> responses = reviewPage.getContent().stream()
                 .map(reviewMapper::reviewToReviewResponse)
@@ -163,5 +165,54 @@ public class ReviewService implements IReviewService {
                         .createdAt(r.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AdminReviewSummaryResponse> getProductReviewSummaries(int page, int pageSize) {
+        int pageIndex = Math.max(0, page - 1);
+        int size = Math.max(1, pageSize);
+        Pageable pageable = PageRequest.of(pageIndex, size);
+
+        Page<ProductReviewSummaryProjection> resultPage = reviewRepository.findProductReviewSummaries(pageable);
+
+        List<AdminReviewSummaryResponse> responses = resultPage.getContent().stream()
+                .map(p -> AdminReviewSummaryResponse.builder()
+                        .productId(p.getProductId())
+                        .productName(p.getProductName())
+                        .productThumbnail(p.getProductThumbnail())
+                        .totalReviews(p.getTotalReviews())
+                        .hiddenCount(p.getHiddenCount())
+                        .visibleCount(p.getTotalReviews() - (p.getHiddenCount() != null ? p.getHiddenCount() : 0L))
+                        .averageRating(p.getAverageRating())
+                        .build())
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responses, pageable, resultPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> getAdminReviewsByProductId(Long productId, int page, int pageSize) {
+        int pageIndex = Math.max(0, page - 1);
+        int size = Math.max(1, pageSize);
+        Pageable pageable = PageRequest.of(pageIndex, size, Sort.by("createdAt").descending());
+
+        Page<Review> reviewPage = reviewRepository.findAllByProduct_Id(productId, pageable);
+
+        List<ReviewResponse> responses = reviewPage.getContent().stream()
+                .map(reviewMapper::reviewToReviewResponse)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responses, pageable, reviewPage.getTotalElements());
+    }
+
+    @Override
+    @Transactional
+    public void toggleReviewVisibility(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy đánh giá"));
+        review.setIsHidden(!Boolean.TRUE.equals(review.getIsHidden()));
+        reviewRepository.save(review);
     }
 }

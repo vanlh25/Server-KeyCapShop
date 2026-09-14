@@ -20,6 +20,7 @@ public class ReviewResponse {
     private LocalDate createdAt;
     private List<String> imageUrls;
     private ReplyResponse reply;
+    private Boolean isHidden;
 
     @Data
     @Builder

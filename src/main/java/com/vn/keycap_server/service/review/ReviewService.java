@@ -1,5 +1,7 @@
 package com.vn.keycap_server.service.review;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.vn.keycap_server.dto.request.review.CreateReplyRequest;
 import com.vn.keycap_server.dto.request.review.CreateReviewRequest;
+import com.vn.keycap_server.dto.request.review.UpdateReviewRequest;
 import com.vn.keycap_server.exception.BadRequestException;
 import com.vn.keycap_server.modal.Order;
 import com.vn.keycap_server.modal.Product;
@@ -145,6 +148,38 @@ public class ReviewService implements IReviewService {
         }
     }
 
+    public static final int MAX_EDIT_DAYS = 30;
+
+    @Override
+    @Transactional
+    public void updateReview(Long reviewId, UpdateReviewRequest request, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy đánh giá"));
+
+        if (review.getUser() == null || !review.getUser().getId().equals(userId)) {
+            throw new BadRequestException("Bạn không có quyền chỉnh sửa đánh giá này");
+        }
+
+        if (Boolean.TRUE.equals(review.getIsHidden())) {
+            throw new BadRequestException("Đánh giá này đã bị ẩn bởi quản trị viên và không thể chỉnh sửa");
+        }
+
+        LocalDate now = LocalDate.now();
+        LocalDate createdAt = review.getCreatedAt() != null ? review.getCreatedAt() : now;
+        long daysPassed = ChronoUnit.DAYS.between(createdAt, now);
+        if (daysPassed > MAX_EDIT_DAYS) {
+            throw new BadRequestException("Đã quá thời hạn " + MAX_EDIT_DAYS + " ngày để chỉnh sửa đánh giá này");
+        }
+
+        review.setRating(request.getRating());
+        review.setContent(request.getContent());
+        if (request.getImageUrls() != null) {
+            review.setImageUrls(new ArrayList<>(request.getImageUrls()));
+        }
+
+        reviewRepository.save(review);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<AvailableReviewResponse> getAvailableReviews(Long orderId, Long userId) {
@@ -156,14 +191,28 @@ public class ReviewService implements IReviewService {
         }
 
         List<Review> reviews = reviewRepository.findByOrder_Id(orderId);
+        LocalDate now = LocalDate.now();
 
         return reviews.stream()
-                .map(r -> AvailableReviewResponse.builder()
-                        .productId(r.getProduct() != null ? r.getProduct().getId() : null)
-                        .rating(r.getRating())
-                        .content(r.getContent())
-                        .createdAt(r.getCreatedAt())
-                        .build())
+                .map(r -> {
+                    LocalDate createdAt = r.getCreatedAt() != null ? r.getCreatedAt() : now;
+                    long daysPassed = ChronoUnit.DAYS.between(createdAt, now);
+                    long remainingDays = Math.max(0, MAX_EDIT_DAYS - daysPassed);
+                    boolean isHidden = Boolean.TRUE.equals(r.getIsHidden());
+                    boolean canEdit = !isHidden && daysPassed <= MAX_EDIT_DAYS;
+
+                    return AvailableReviewResponse.builder()
+                            .id(r.getId())
+                            .productId(r.getProduct() != null ? r.getProduct().getId() : null)
+                            .rating(r.getRating())
+                            .content(r.getContent())
+                            .imageUrls(r.getImageUrls() != null ? new ArrayList<>(r.getImageUrls()) : new ArrayList<>())
+                            .createdAt(r.getCreatedAt())
+                            .updatedAt(r.getUpdatedAt())
+                            .canEdit(canEdit)
+                            .remainingDays(remainingDays)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

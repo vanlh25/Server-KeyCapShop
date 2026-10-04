@@ -18,6 +18,7 @@ public class ReviewResponse {
     private Integer rating;
     private String content;
     private LocalDate createdAt;
+    private LocalDate updatedAt;
     private List<String> imageUrls;
     private ReplyResponse reply;
     private Boolean isHidden;

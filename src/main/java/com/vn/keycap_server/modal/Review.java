@@ -53,7 +53,8 @@ public class Review extends AbstractEntity {
     private User user;
 
     // Trạng thái ẩn/hiện của đánh giá (admin/staff quản lý)
-    @Column(name = "is_hidden", nullable = false)
+    @Builder.Default
+    @Column(name = "is_hidden", nullable = false, columnDefinition = "boolean default false")
     private Boolean isHidden = false;
 
     // Phản hồi của admin/staff

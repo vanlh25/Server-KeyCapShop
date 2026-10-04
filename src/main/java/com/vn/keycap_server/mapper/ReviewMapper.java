@@ -17,6 +17,7 @@ public interface ReviewMapper {
     @Mapping(target = "rating", source = "rating")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "imageUrls", source = "imageUrls")
     @Mapping(target = "reply", source = "reply")
     @Mapping(target = "isHidden", source = "isHidden")

@@ -1,6 +1,7 @@
 package com.vn.keycap_server.controller;
 
 import com.vn.keycap_server.dto.request.review.CreateReviewRequest;
+import com.vn.keycap_server.dto.request.review.UpdateReviewRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +62,19 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.builder()
                 .success(true)
                 .message("Gửi đánh giá sản phẩm thành công!")
+                .build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateReview(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateReviewRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        Long userId = JwtUtils.getUserId(jwt);
+        reviewService.updateReview(id, request, userId);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .success(true)
+                .message("Cập nhật đánh giá thành công!")
                 .build());
     }
 

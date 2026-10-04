@@ -1265,23 +1265,23 @@ INSERT INTO wishlists (id, user_id, product_id, created_at, updated_at) VALUES
 (8, 6, 25, '2026-06-08', '2026-06-08');
 
 -- Reviews
-INSERT INTO reviews (id, rating, content, order_id, product_id, user_id, created_at, updated_at) VALUES
-(3, 4, 'K8 Pro dễ dùng, keycap PBT ổn và layout TKL rất hợp làm việc.', 6, 2, 2, '2026-05-15', '2026-05-15'),
-(4, 5, 'Q5 Max layout 96% gọn hơn fullsize nhưng vẫn có numpad, rất tiện.', 7, 11, 3, '2026-05-23', '2026-05-23'),
-(5, 4, 'M6 cầm thoải mái, dùng văn phòng và chỉnh ảnh đều ổn.', 8, 20, 4, '2026-04-24', '2026-04-24'),
-(6, 5, 'V1 Max đáng tiền, có knob và wireless đầy đủ cho người mới vào hobby.', NULL, 4, 5, '2026-06-10', '2026-06-10'),
-(7, 5, 'K2 HE rapid trigger rất thú vị khi chơi game, magnetic switch phản hồi nhanh.', NULL, 7, 6, '2026-06-11', '2026-06-11'),
-(8, 4, 'K3 Max mỏng, nhẹ, hợp mang giữa nhà và văn phòng.', NULL, 8, 7, '2026-06-12', '2026-06-12'),
-(9, 5, 'Q3 Max TKL build nhôm chắc và không chiếm quá nhiều bàn.', NULL, 10, 8, '2026-06-12', '2026-06-12'),
-(10, 4, 'V2 Max 65% rất gọn, đủ phím điều hướng cho daily.', NULL, 18, 9, '2026-06-13', '2026-06-13'),
-(11, 5, 'Q11 split giúp cổ tay thoải mái hơn, hơi mất thời gian làm quen nhưng rất đáng.', NULL, 23, 2, '2026-06-14', '2026-06-14'),
-(12, 4, 'V10 Max Alice layout tiện nếu đã quen ergonomic keyboard.', NULL, 24, 3, '2026-06-14', '2026-06-14'),
-(13, 5, 'Q12 Max southpaw numpad lạ mà dùng spreadsheet rất tiện.', NULL, 25, 4, '2026-06-15', '2026-06-15'),
-(14, 4, 'M3 nhẹ, sensor ổn, giá hợp lý cho chuột wireless.', NULL, 21, 5, '2026-06-15', '2026-06-15'),
-(15, 5, 'M2 nhỏ gọn, pin ổn và receiver 4K dùng mượt.', NULL, 22, 6, '2026-06-16', '2026-06-16'),
-(16, 5, 'Q6 Pro fullsize hợp làm việc kế toán, build rất chắc.', NULL, 17, 7, '2026-06-16', '2026-06-16'),
-(17, 4, 'B1 Pro mỏng, pin lâu, phù hợp setup văn phòng tối giản.', NULL, 9, 8, '2026-06-17', '2026-06-17'),
-(18, 5, 'Q14 Max Alice 96% là layout rất thú vị nếu cần numpad nhưng vẫn muốn ergonomic.', NULL, 26, 9, '2026-06-17', '2026-06-17');
+INSERT INTO reviews (id, rating, content, order_id, product_id, user_id, is_hidden, created_at, updated_at) VALUES
+(3, 4, 'K8 Pro dễ dùng, keycap PBT ổn và layout TKL rất hợp làm việc.', 6, 2, 2, 0, '2026-05-15', '2026-05-15'),
+(4, 5, 'Q5 Max layout 96% gọn hơn fullsize nhưng vẫn có numpad, rất tiện.', 7, 11, 3, 0, '2026-05-23', '2026-05-23'),
+(5, 4, 'M6 cầm thoải mái, dùng văn phòng và chỉnh ảnh đều ổn.', 8, 20, 4, 0, '2026-04-24', '2026-04-24'),
+(6, 5, 'V1 Max đáng tiền, có knob và wireless đầy đủ cho người mới vào hobby.', NULL, 4, 5, 0, '2026-06-10', '2026-06-10'),
+(7, 5, 'K2 HE rapid trigger rất thú vị khi chơi game, magnetic switch phản hồi nhanh.', NULL, 7, 6, 0, '2026-06-11', '2026-06-11'),
+(8, 4, 'K3 Max mỏng, nhẹ, hợp mang giữa nhà và văn phòng.', NULL, 8, 7, 0, '2026-06-12', '2026-06-12'),
+(9, 5, 'Q3 Max TKL build nhôm chắc và không chiếm quá nhiều bàn.', NULL, 10, 8, 0, '2026-06-12', '2026-06-12'),
+(10, 4, 'V2 Max 65% rất gọn, đủ phím điều hướng cho daily.', NULL, 18, 9, 0, '2026-06-13', '2026-06-13'),
+(11, 5, 'Q11 split giúp cổ tay thoải mái hơn, hơi mất thời gian làm quen nhưng rất đáng.', NULL, 23, 2, 0, '2026-06-14', '2026-06-14'),
+(12, 4, 'V10 Max Alice layout tiện nếu đã quen ergonomic keyboard.', NULL, 24, 3, 0, '2026-06-14', '2026-06-14'),
+(13, 5, 'Q12 Max southpaw numpad lạ mà dùng spreadsheet rất tiện.', NULL, 25, 4, 0, '2026-06-15', '2026-06-15'),
+(14, 4, 'M3 nhẹ, sensor ổn, giá hợp lý cho chuột wireless.', NULL, 21, 5, 0, '2026-06-15', '2026-06-15'),
+(15, 5, 'M2 nhỏ gọn, pin ổn và receiver 4K dùng mượt.', NULL, 22, 6, 0, '2026-06-16', '2026-06-16'),
+(16, 5, 'Q6 Pro fullsize hợp làm việc kế toán, build rất chắc.', NULL, 17, 7, 0, '2026-06-16', '2026-06-16'),
+(17, 4, 'B1 Pro mỏng, pin lâu, phù hợp setup văn phòng tối giản.', NULL, 9, 8, 0, '2026-06-17', '2026-06-17'),
+(18, 5, 'Q14 Max Alice 96% là layout rất thú vị nếu cần numpad nhưng vẫn muốn ergonomic.', NULL, 26, 9, 0, '2026-06-17', '2026-06-17');
 
 -- Review Images
 INSERT INTO review_images (review_id, image_url) VALUES

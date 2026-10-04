@@ -2,6 +2,8 @@ package com.vn.keycap_server.service.brand;
 
 import java.util.List;
 
+import com.vn.keycap_server.dto.request.brand.CreateBrandRequest;
+import com.vn.keycap_server.dto.request.brand.UpdateBrandRequest;
 import com.vn.keycap_server.dto.response.BrandResponse;
 
 /**
@@ -10,10 +12,13 @@ import com.vn.keycap_server.dto.response.BrandResponse;
  */
 public interface IBrandService {
 
-    /**
-     * Lấy danh sách thương hiệu phục vụ khu vực admin.
-     *
-     * @return danh sách thương hiệu tối giản gồm id, name và slug
-     */
     List<BrandResponse> getAllBrands();
+
+    BrandResponse getBrandById(Long id);
+
+    BrandResponse createBrand(CreateBrandRequest request);
+
+    BrandResponse updateBrand(Long id, UpdateBrandRequest request);
+
+    void deleteBrand(Long id);
 }

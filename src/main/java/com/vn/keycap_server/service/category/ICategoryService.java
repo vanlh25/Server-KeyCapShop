@@ -2,6 +2,8 @@ package com.vn.keycap_server.service.category;
 
 import java.util.List;
 
+import com.vn.keycap_server.dto.request.category.CreateCategoryRequest;
+import com.vn.keycap_server.dto.request.category.UpdateCategoryRequest;
 import com.vn.keycap_server.dto.response.CategoryResponse;
 
 /**
@@ -10,10 +12,13 @@ import com.vn.keycap_server.dto.response.CategoryResponse;
  */
 public interface ICategoryService {
 
-    /**
-     * Lấy danh sách danh mục phục vụ khu vực admin.
-     *
-     * @return danh sách danh mục tối giản gồm id, name và slug
-     */
     List<CategoryResponse> getAllCategories();
+
+    CategoryResponse getCategoryById(Long id);
+
+    CategoryResponse createCategory(CreateCategoryRequest request);
+
+    CategoryResponse updateCategory(Long id, UpdateCategoryRequest request);
+
+    void deleteCategory(Long id);
 }

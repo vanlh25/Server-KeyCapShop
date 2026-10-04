@@ -10,4 +10,9 @@ import com.vn.keycap_server.modal.Brand;
  */
 @Repository
 public interface BrandRepository extends JpaRepository<Brand, Long> {
+
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, Long id);
 }
+

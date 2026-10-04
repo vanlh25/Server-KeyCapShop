@@ -82,4 +82,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "GROUP BY o.user.id, o.user.fullName, o.user.email " +
             "ORDER BY SUM(o.totalAmount) DESC")
     List<Object[]> findTopCustomers(Pageable pageable);
+
+    // Tổng chi tiêu đơn hàng SUCCESS của một khách hàng (dùng cho Customer Management)
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.user.id = :userId AND o.status = 'SUCCESS'")
+    BigDecimal sumTotalSpentByUserId(@Param("userId") Long userId);
 }
+

@@ -29,8 +29,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByIdAndRole(Long id, ERole role);
 
+    @EntityGraph(attributePaths = "avatarMedia")
     Page<User> findByRole(ERole role, Pageable pageable);
 
+    @EntityGraph(attributePaths = "avatarMedia")
     @Query("""
             SELECT u
             FROM User u

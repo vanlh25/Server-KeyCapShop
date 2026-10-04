@@ -66,6 +66,10 @@ public class User extends AbstractEntity {
     @Column(name = "role")
     private ERole role;
 
+    // Trạng thái khóa tài khoản: true = bị khóa, false/null = đang hoạt động
+    @Column(name = "locked", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean locked = false;
+
     // Relationship
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

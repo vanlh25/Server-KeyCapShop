@@ -10,6 +10,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.vn.keycap_server.modal.Product;
 import com.vn.keycap_server.modal.Wishlist;
 
 /**
@@ -20,6 +23,13 @@ import com.vn.keycap_server.modal.Wishlist;
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
     long countByUserId(Long userId);
+
+    /**
+     * Lấy danh sách sản phẩm yêu thích kèm phân trang cho user.
+     */
+    @Query(value = "select w.product from Wishlist w where w.user.id = :userId order by w.id desc",
+           countQuery = "select count(w) from Wishlist w where w.user.id = :userId")
+    Page<Product> findWishlistProductsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     /**
      * Lấy danh sách ID sản phẩm yêu thích của user.

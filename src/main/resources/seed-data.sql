@@ -1295,5 +1295,17 @@ INSERT INTO review_replies (id, review_id, user_id, content, created_at, updated
 (3, 5, 11, 'Cảm ơn đánh giá chi tiết. Nếu cần tư vấn mouse feet hoặc grip tape, shop luôn sẵn sàng hỗ trợ.', '2026-04-25', '2026-04-25'),
 (4, 11, 11, 'Split keyboard cần thời gian làm quen, nhưng khi quen thì rất thoải mái cho cổ tay.', '2026-06-15', '2026-06-15');
 
+-- Flash Sales
+INSERT INTO flash_sales (id, name, start_time, end_time, status, created_at, updated_at) VALUES
+(1, 'Flash Sale Giữa Tháng 10', '2026-10-01 00:00:00', '2026-10-31 23:59:59', 'ACTIVE', '2026-10-01', '2026-10-01'),
+(2, 'Siêu Sale Cuối Tuần Keycap & Switch', '2026-11-01 00:00:00', '2026-11-03 23:59:59', 'UPCOMING', '2026-10-01', '2026-10-01');
+
+-- Flash Sale Items
+INSERT INTO flash_sale_items (id, flash_sale_id, product_id, variant_id, original_price, flash_sale_price, total_slots, sold_slots, user_limit, created_at, updated_at) VALUES
+(1, 1, 1, 1, 2490000, 1890000, 20, 14, 1, '2026-10-01', '2026-10-01'),
+(2, 1, 2, 4, 2490000, 1790000, 30, 8, 2, '2026-10-01', '2026-10-01'),
+(3, 2, 3, 7, 2490000, 1990000, 15, 0, 1, '2026-10-01', '2026-10-01');
+
 -- Enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
+

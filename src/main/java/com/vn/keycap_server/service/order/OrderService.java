@@ -8,7 +8,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+
 import com.vn.keycap_server.dto.response.order.*;
+import com.vn.keycap_server.modal.FlashSaleItem;
 import com.vn.keycap_server.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +58,7 @@ public class OrderService implements IOrderService {
         private final CartItemRepository cartItemRepository;
         private final ProductRepository productRepository;
         private final ReviewRepository reviewRepository;
+        private final FlashSaleItemRepository flashSaleItemRepository;
 
         private final OrderHistoryService orderHistoryService;
         private final GhnShippingService ghnShippingService;
@@ -64,6 +69,32 @@ public class OrderService implements IOrderService {
         private final OrderExpiryProducer orderExpiryProducer;
 
         private final OrderMapper orderMapper;
+
+        private record VariantPricing(BigDecimal unitPrice, BigDecimal originalPrice, Integer discountPercent, FlashSaleItem flashSaleItem) {}
+
+        private VariantPricing resolveVariantPricing(ProductVariant productVariant, int quantity) {
+                LocalDateTime now = LocalDateTime.now();
+                List<FlashSaleItem> activeItems = flashSaleItemRepository.findActiveItemsByVariantId(productVariant.getId(), now);
+                FlashSaleItem activeItem = activeItems.stream().findFirst().orElse(null);
+
+                BigDecimal unitPrice = productVariant.getPrice();
+                BigDecimal originalPrice = productVariant.getOriginalPrice() != null ? productVariant.getOriginalPrice() : productVariant.getPrice();
+                Integer discountPercent = productVariant.getPercentDiscount();
+
+                if (activeItem != null && activeItem.getSoldSlots() < activeItem.getTotalSlots()) {
+                        unitPrice = activeItem.getFlashSalePrice();
+                        originalPrice = activeItem.getOriginalPrice() != null ? activeItem.getOriginalPrice() : productVariant.getPrice();
+                        if (originalPrice != null && originalPrice.compareTo(BigDecimal.ZERO) > 0) {
+                                BigDecimal diff = originalPrice.subtract(unitPrice);
+                                discountPercent = diff.multiply(BigDecimal.valueOf(100))
+                                                .divide(originalPrice, 0, RoundingMode.HALF_UP)
+                                                .intValue();
+                        }
+                        return new VariantPricing(unitPrice, originalPrice, discountPercent, activeItem);
+                }
+
+                return new VariantPricing(unitPrice, originalPrice, discountPercent, null);
+        }
 
         @Override
         public PrepareCheckoutResponse prepareOrder(PrepareCheckoutRequestWrapper request, Long userId) {
@@ -103,7 +134,8 @@ public class OrderService implements IOrderService {
                                                 "Sản phẩm '" + productVariant.getProduct().getName()
                                                                 + "' không đủ số lượng");
                         }
-                        BigDecimal amount = productVariant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                        VariantPricing pricing = resolveVariantPricing(productVariant, item.getQuantity());
+                        BigDecimal amount = pricing.unitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                         subtotal = subtotal.add(amount);
 
                         Map<String, String> attributes = productVariant.getAttributes().stream()
@@ -125,11 +157,9 @@ public class OrderService implements IOrderService {
                                                                         .name(productVariant.getProduct().getName())
                                                                         .imageUrl(imageUrl)
                                                                         .attributes(attributes)
-                                                                        .price(productVariant.getPrice())
-                                                                        .originalPrice(productVariant
-                                                                                        .getOriginalPrice())
-                                                                        .discountPercentage(productVariant
-                                                                                        .getPercentDiscount())
+                                                                        .price(pricing.unitPrice())
+                                                                        .originalPrice(pricing.originalPrice())
+                                                                        .discountPercentage(pricing.discountPercent())
                                                                         .build())
                                         .quantity(item.getQuantity())
                                         .amount(amount)
@@ -198,7 +228,8 @@ public class OrderService implements IOrderService {
                                                 "Sản phẩm '" + productVariant.getProduct().getName()
                                                                 + "' không đủ số lượng");
                         }
-                        BigDecimal amount = productVariant.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                        VariantPricing pricing = resolveVariantPricing(productVariant, item.getQuantity());
+                        BigDecimal amount = pricing.unitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                         subtotal = subtotal.add(amount);
 
                         // Delete Stock
@@ -236,11 +267,21 @@ public class OrderService implements IOrderService {
                 List<OrderItem> orderItems = new ArrayList<>();
                 for (CheckoutItemRequest item : request.getItems()) {
                         ProductVariant productVariant = variantMap.get(item.getVariantId());
+                        VariantPricing pricing = resolveVariantPricing(productVariant, item.getQuantity());
+
+                        if (pricing.flashSaleItem() != null) {
+                                int availableSlots = pricing.flashSaleItem().getTotalSlots() - pricing.flashSaleItem().getSoldSlots();
+                                int slotsToIncrement = Math.min(item.getQuantity(), Math.max(0, availableSlots));
+                                if (slotsToIncrement > 0) {
+                                        flashSaleItemRepository.incrementSoldSlots(pricing.flashSaleItem().getId(), slotsToIncrement);
+                                }
+                        }
+
                         orderItems.add(OrderItem.builder()
                                         .order(order)
                                         .variant(productVariant)
                                         .quantity(item.getQuantity())
-                                        .price(productVariant.getPrice())
+                                        .price(pricing.unitPrice())
                                         .build());
 
                 }

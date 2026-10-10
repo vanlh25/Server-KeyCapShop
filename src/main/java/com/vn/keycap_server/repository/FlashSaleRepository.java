@@ -40,4 +40,21 @@ public interface FlashSaleRepository extends JpaRepository<FlashSale, Long>, Jpa
         AND s.endTime < :time
       """)
   List<FlashSale> findActiveSalesReadyToExpire(@Param("time") LocalDateTime time);
+
+  @Query("""
+      SELECT s FROM FlashSale s
+      WHERE s.status = 'ACTIVE'
+        AND s.startTime <= :time
+        AND s.endTime >= :time
+      ORDER BY s.endTime ASC, s.id DESC
+      """)
+  List<FlashSale> findCurrentActiveSales(@Param("time") LocalDateTime time, Pageable pageable);
+
+  @Query("""
+      SELECT s FROM FlashSale s
+      WHERE s.status = 'UPCOMING'
+        AND s.startTime > :time
+      ORDER BY s.startTime ASC
+      """)
+  List<FlashSale> findUpcomingSlots(@Param("time") LocalDateTime time, Pageable pageable);
 }

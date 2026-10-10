@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/payment/momo/ipn").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/payment/vnpay/ipn").permitAll()
                 .requestMatchers(HttpMethod.GET, "/products/**", "/reviews").permitAll()
-                .requestMatchers(HttpMethod.GET, "/banners").permitAll()
+                .requestMatchers(HttpMethod.GET, "/banners", "/flash-sales/**").permitAll()
                 .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF")
                 .anyRequest().authenticated());
 

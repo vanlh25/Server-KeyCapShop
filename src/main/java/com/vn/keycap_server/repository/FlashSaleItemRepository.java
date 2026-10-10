@@ -30,4 +30,28 @@ public interface FlashSaleItemRepository extends JpaRepository<FlashSaleItem, Lo
                                             @Param("startTime") LocalDateTime startTime,
                                             @Param("endTime") LocalDateTime endTime,
                                             @Param("excludeSaleId") Long excludeSaleId);
+
+    @Query("""
+            SELECT i FROM FlashSaleItem i
+            JOIN i.flashSale s
+            WHERE i.variant.id = :variantId
+              AND s.status = 'ACTIVE'
+              AND s.startTime <= :time
+              AND s.endTime >= :time
+            ORDER BY s.endTime ASC, s.id DESC
+            """)
+    List<FlashSaleItem> findActiveItemsByVariantId(@Param("variantId") Long variantId, @Param("time") LocalDateTime time);
+
+    default Optional<FlashSaleItem> findActiveItemByVariantId(Long variantId, LocalDateTime time) {
+        List<FlashSaleItem> items = findActiveItemsByVariantId(variantId, time);
+        return items.isEmpty() ? Optional.empty() : Optional.of(items.get(0));
+    }
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("""
+            UPDATE FlashSaleItem i
+            SET i.soldSlots = i.soldSlots + :qty
+            WHERE i.id = :itemId AND i.soldSlots + :qty <= i.totalSlots
+            """)
+    int incrementSoldSlots(@Param("itemId") Long itemId, @Param("qty") int qty);
 }

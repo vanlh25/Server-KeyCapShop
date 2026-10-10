@@ -1,6 +1,8 @@
 package com.vn.keycap_server.service.cart;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,10 +26,12 @@ import com.vn.keycap_server.exception.BadRequestException;
 import com.vn.keycap_server.exception.ResourceNotFoundException;
 import com.vn.keycap_server.exception.UnauthorizedException;
 import com.vn.keycap_server.modal.CartItem;
+import com.vn.keycap_server.modal.FlashSaleItem;
 import com.vn.keycap_server.modal.ProductVariant;
 import com.vn.keycap_server.modal.ProductImage;
 import com.vn.keycap_server.modal.ProductVariantAttribute;
 import com.vn.keycap_server.repository.CartItemRepository;
+import com.vn.keycap_server.repository.FlashSaleItemRepository;
 import com.vn.keycap_server.repository.ProductImageRepository;
 import com.vn.keycap_server.repository.ProductVariantRepository;
 import com.vn.keycap_server.utils.EProductStatus;
@@ -46,6 +50,7 @@ public class CartService implements ICartService {
     private final CartItemRepository cartItemRepository;
     private final ProductVariantRepository productVariantRepository;
     private final ProductImageRepository productImageRepository;
+    private final FlashSaleItemRepository flashSaleItemRepository;
 
     /**
      * Lấy chi tiết giỏ hàng của user, bao gồm product, variant, attributes và
@@ -89,11 +94,31 @@ public class CartService implements ICartService {
         BigDecimal total = BigDecimal.ZERO;
         List<CartItemDetailResponse> items = new java.util.ArrayList<>(cartItems.size());
 
+        LocalDateTime now = LocalDateTime.now();
         for (CartItem cartItem : cartItems) {
             ProductVariant variant = cartItem.getVariant();
             int quantity = cartItem.getQuantity();
+
+            List<FlashSaleItem> activeItems = flashSaleItemRepository.findActiveItemsByVariantId(variant.getId(), now);
+            FlashSaleItem activeItem = activeItems.stream().findFirst().orElse(null);
+
+            BigDecimal unitPrice = variant.getPrice();
+            BigDecimal originalPrice = variant.getOriginalPrice() != null ? variant.getOriginalPrice() : variant.getPrice();
+            Integer discountPercent = variant.getPercentDiscount();
+
+            if (activeItem != null && activeItem.getSoldSlots() < activeItem.getTotalSlots()) {
+                unitPrice = activeItem.getFlashSalePrice();
+                originalPrice = activeItem.getOriginalPrice() != null ? activeItem.getOriginalPrice() : variant.getPrice();
+                if (originalPrice != null && originalPrice.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal diff = originalPrice.subtract(unitPrice);
+                    discountPercent = diff.multiply(BigDecimal.valueOf(100))
+                            .divide(originalPrice, 0, RoundingMode.HALF_UP)
+                            .intValue();
+                }
+            }
+
             cartCount += quantity;
-            total = total.add(variant.getPrice().multiply(BigDecimal.valueOf(quantity)));
+            total = total.add(unitPrice.multiply(BigDecimal.valueOf(quantity)));
 
             // Nếu dữ liệu cũ có attribute trùng tên, ưu tiên giá trị đầu tiên.
             Map<String, String> attributes = variant.getAttributes() == null
@@ -115,9 +140,9 @@ public class CartService implements ICartService {
                     .variant(CartVariantResponse.builder()
                             .id(variant.getId())
                             .attributes(attributes)
-                            .price(variant.getPrice())
-                            .originalPrice(variant.getOriginalPrice())
-                            .percentDiscount(variant.getPercentDiscount())
+                            .price(unitPrice)
+                            .originalPrice(originalPrice)
+                            .percentDiscount(discountPercent)
                             .quantity(quantity)
                             .stockQuantity(variant.getStockQuantity())
                             .build())

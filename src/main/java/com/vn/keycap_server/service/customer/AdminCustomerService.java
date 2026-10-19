@@ -19,18 +19,21 @@ import com.vn.keycap_server.repository.OrderRepository;
 import com.vn.keycap_server.repository.UserRepository;
 import com.vn.keycap_server.utils.ERole;
 
-import lombok.RequiredArgsConstructor;
 
 /**
  * Service xử lý nghiệp vụ quản lý khách hàng cho admin.
  * Chỉ thao tác với user có role USER, không bao giờ lộ ADMIN hoặc STAFF.
  */
 @Service
-@RequiredArgsConstructor
 public class AdminCustomerService implements IAdminCustomerService {
 
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
+
+    public AdminCustomerService(UserRepository userRepository, OrderRepository orderRepository) {
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)

@@ -85,6 +85,10 @@ public class CategoryService implements ICategoryService {
     @Transactional
     public void deleteCategory(Long id) {
         Category category = getEntity(id);
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+            throw new BadRequestException(
+                    "Không thể xóa danh mục đang chứa sản phẩm. Vui lòng chuyển hoặc xóa sản phẩm trước.");
+        }
         categoryRepository.delete(category);
     }
 

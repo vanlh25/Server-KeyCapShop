@@ -2,6 +2,7 @@ package com.vn.keycap_server.dto.request.banner;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -20,8 +21,9 @@ public class CreateBannerRequest {
 
     private String linkUrl;
 
+    @NotNull(message = "Thứ tự hiển thị không được để trống")
     @Min(value = 0, message = "Thứ tự hiển thị phải >= 0")
-    private int displayOrder = 0;
+    private Integer displayOrder = 0;
 
     private boolean active = true;
 }

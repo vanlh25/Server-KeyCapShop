@@ -87,7 +87,12 @@ public class BrandService implements IBrandService {
     @Override
     @Transactional
     public void deleteBrand(Long id) {
-        brandRepository.delete(getEntity(id));
+        Brand brand = getEntity(id);
+        if (brand.getProducts() != null && !brand.getProducts().isEmpty()) {
+            throw new BadRequestException(
+                    "Không thể xóa thương hiệu đang có sản phẩm liên kết. Vui lòng chuyển hoặc xóa sản phẩm trước.");
+        }
+        brandRepository.delete(brand);
     }
 
     private Brand getEntity(Long id) {

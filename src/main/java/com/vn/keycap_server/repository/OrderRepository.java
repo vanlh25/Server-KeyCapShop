@@ -26,6 +26,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     Optional<Order> findByTransactionId(String transactionId);
 
+    List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
+
     List<Order> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, EOrderStatus status);
 
     List<Order> findByUserIdAndStatusInOrderByCreatedAtDesc(Long userId, List<EOrderStatus> statuses);

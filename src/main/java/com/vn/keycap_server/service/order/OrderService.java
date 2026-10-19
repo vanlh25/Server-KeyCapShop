@@ -340,9 +340,7 @@ public class OrderService implements IOrderService {
         public List<OrderResponse> getUserOrders(Long userId, String status) {
                 List<Order> orders;
                 if (status == null || status.isEmpty()) {
-                        orders = orderRepository.findByUserIdAndStatusInOrderByCreatedAtDesc(userId,
-                                        List.of(EOrderStatus.PENDING, EOrderStatus.PREPARING, EOrderStatus.SHIPPING));
-
+                        orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
                 } else {
                         EOrderStatus orderStatus = EOrderStatus.valueOf(status.toUpperCase());
                         orders = orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, orderStatus);
